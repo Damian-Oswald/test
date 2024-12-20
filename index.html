@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub File Editor</title>
+</head>
+<body>
+  <h1>GitHub File Editor</h1>
+  
+  <!-- Authentication Form -->
+  <div>
+    <label for="username">GitHub Username:</label>
+    <input type="text" id="username" placeholder="Enter GitHub username">
+    <br>
+    <label for="token">Personal Access Token (PAT):</label>
+    <input type="password" id="token" placeholder="Enter your PAT">
+    <br>
+    <label for="repo">Repository:</label>
+    <input type="text" id="repo" placeholder="username/repository">
+    <br>
+    <label for="filePath">File Path:</label>
+    <input type="text" id="filePath" placeholder="path/to/file.json">
+    <br>
+    <button id="loadFile">Load File</button>
+  </div>
+  
+  <hr>
+  
+  <!-- File Editor -->
+  <div id="editor" style="display: none;">
+    <h2>Editing File: <span id="currentFile"></span></h2>
+    <textarea id="fileContent" rows="20" cols="80"></textarea>
+    <br>
+    <button id="saveFile">Save Changes</button>
+  </div>
+
+  <script>
+    // Elements
+    const usernameInput = document.getElementById('username');
+    const tokenInput = document.getElementById('token');
+    const repoInput = document.getElementById('repo');
+    const filePathInput = document.getElementById('filePath');
+    const loadFileButton = document.getElementById('loadFile');
+    const editorDiv = document.getElementById('editor');
+    const fileContentTextarea = document.getElementById('fileContent');
+    const currentFileSpan = document.getElementById('currentFile');
+    const saveFileButton = document.getElementById('saveFile');
+
+    let currentSha = ''; // To store the SHA of the file for updates
+
+    // Function to load file from GitHub
+    loadFileButton.addEventListener('click', async () => {
+      const username = usernameInput.value;
+      const token = tokenInput.value;
+      const repo = repoInput.value;
+      const filePath = filePathInput.value;
+
+      if (!username || !token || !repo || !filePath) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const url = `https://api.github.com/repos/${repo}/contents/${filePath}`;
+
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load file: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const content = atob(data.content); // Decode Base64 content
+
+        // Display file content in editor
+        fileContentTextarea.value = content;
+        currentFileSpan.textContent = filePath;
+        editorDiv.style.display = 'block';
+
+        // Save the file's SHA for later use
+        currentSha = data.sha;
+
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    });
+
+    // Function to save file to GitHub
+    saveFileButton.addEventListener('click', async () => {
+      const username = usernameInput.value;
+      const token = tokenInput.value;
+      const repo = repoInput.value;
+      const filePath = filePathInput.value;
+      const newContent = fileContentTextarea.value;
+
+      if (!username || !token || !repo || !filePath || !currentSha) {
+        alert('Please ensure the file is loaded before saving.');
+        return;
+      }
+
+      const url = `https://api.github.com/repos/${repo}/contents/${filePath}`;
+      const encodedContent = btoa(newContent); // Encode content to Base64
+
+      const payload = {
+        message: `Updated ${filePath} via web app`,
+        content: encodedContent,
+        sha: currentSha
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to save file: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        alert(`File saved successfully! Commit SHA: ${data.commit.sha}`);
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    });
+  </script>
+</body>
+</html>
