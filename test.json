@@ -20,7 +20,7 @@
     "species" : "cat",
     "foods": {
       "likes": ["mice"],
-      "dislikes": ["salmon"]
+      "dislikes": ["salmon", "salad"]
     }
   }
 ]
