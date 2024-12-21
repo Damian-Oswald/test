@@ -11,7 +11,7 @@
     "name": "Barky",
     "species" : "dog",
     "foods": {
-      "likes": ["bones", "carrots"],
+      "likes": ["bones", "carrots", "salami"],
       "dislikes": ["tuna"]
     }
   },
