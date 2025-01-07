@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub File Editor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>GitHub File Editor</h1>
+  
+  <!-- Authentication Form -->
+  <div class="auth-form">
+    <label for="username">GitHub Username:</label>
+    <input type="text" id="username" placeholder="Enter GitHub username">
+    <br>
+    <label for="token">Personal Access Token (PAT):</label>
+    <input type="password" id="token" placeholder="Enter your PAT">
+    <br>
+    <button id="loadFile">Load File</button>
+  </div>
+  
+  <hr>
+  
+  <!-- File Editor -->
+  <div id="editor" class="editor" style="display: none;">
+    <h2>Editing File: <span id="currentFile"></span></h2>
+    <textarea id="fileContent" rows="20" cols="80"></textarea>
+    <br>
+    <button id="saveFile">Save Changes</button>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
